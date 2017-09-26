@@ -3,7 +3,7 @@ import json
 import sys
 import time
 import requests
-
+# Collect all possible places in china using BAIDU API
 
 
 class BaiDuPOI(object):
@@ -15,6 +15,7 @@ class BaiDuPOI(object):
     def baidu_search(self):
         api_key = baidu_api
         json_sel = []
+        # 避免服务器连接次数过多过频而导致连接中断
         r = ''
         while r == '':
             try:
@@ -28,6 +29,7 @@ class BaiDuPOI(object):
                 print("Was a nice sleep, now let me continue...")
                 continue
         data = json.loads(r.text)
+        # 解析Json结果，对可能的空键值条件
         if(data.get('total')):
             total = data["total"]
             for pages in range(0, int(total/20)+1):
@@ -115,8 +117,10 @@ if __name__ == '__main__':
     for line in tags.readlines():
         line = line.strip('\n')
         list_of_tags.append(line)
-    for loc_to_use in locs_to_use[4000:5000]:
-        file_name = 'data/baidu_poi0.csv'
+    for loc_to_use in locs_to_use[5000:]:
+        i = list.index(locs_to_use, loc_to_use)
+        if i %1000 == 0:
+            file_name = 'data/baidu_poi'+ str(int(i/1000)) + '.csv'
         print(str((list.index(locs_to_use, loc_to_use)+1)) + "of" +str(len(locs_to_use)) + "completed")
         print(loc_to_use + 'processing')
         for tag in list_of_tags:

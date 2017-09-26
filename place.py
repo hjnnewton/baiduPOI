@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import requests
 import json
+# Using the suggestion API of Baidu Map to collect the places of interest
 regions = open('region.txt')
 searches = open('test.txt')
 try:
