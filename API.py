@@ -2,7 +2,7 @@
 from __future__ import print_function, unicode_literals
 
 from bosonnlp import BosonNLP
-
+# 测试Boson实体识别API
 # 注意：在测试时请更换为您的API token
 nlp = BosonNLP('Reg0KvHM.17970.YFwdM3sID8xa')
 test = open("地标.txt")
