@@ -21,6 +21,19 @@ class BaiDuPOI(object):
             try:
                 r = requests.get('http://api.map.baidu.com/place/v2/search?query=' + self.itemy + '&bounds=' + self.loc +
                                 '&page_size=20&page_num=0' + '&output=json&ak=' + api_key)
+                data = json.loads(r.text)
+                # 超出限额
+                if (data.get('status') == 302):
+                    print("超出日限额，停止爬取")
+                    json_sel.append('###')
+                    return json_sel
+                # 超出并发限额
+                if (data.get('status') == 401):
+                    print("并发量超出限额，休息中")
+                    time.sleep(5)
+                    print("继续尝试")
+                if (data.get('status') == 0):
+                    print('continue')
             except:
                 print("Connection refused by the server..")
                 print("Let me sleep for 5 seconds")
@@ -106,7 +119,8 @@ class LocaDiv(object):
 
 
 if __name__ == '__main__':
-    baidu_api = '4zbsyOHMfdK5BDnhnkthr53Z'  # 这里填入你的百度API
+    # baidu_api = '4zbsyOHMfdK5BDnhnkthr53Z'  # 这里填入你的百度API
+    baidu_api = 'apPmBxAQ3wfqKtwpll7NtlE0bqGpRvot'
     print("开始爬数据，请稍等...")
     start_time = time.time()
     loc = LocaDiv('23.5,100,45,120')
@@ -117,20 +131,30 @@ if __name__ == '__main__':
     for line in tags.readlines():
         line = line.strip('\n')
         list_of_tags.append(line)
-    for loc_to_use in locs_to_use[5000:]:
+    file_name = 'data/baidu_poi11.csv'
+    break_flag = False
+    for loc_to_use in locs_to_use[23031:30000]:
         i = list.index(locs_to_use, loc_to_use)
         if i %1000 == 0:
             file_name = 'data/baidu_poi'+ str(int(i/1000)) + '.csv'
-        print(str((list.index(locs_to_use, loc_to_use)+1)) + "of" +str(len(locs_to_use)) + "completed")
+        print(str((list.index(locs_to_use, loc_to_use)+1)) + " of " +str(len(locs_to_use)) + " completed")
         print(loc_to_use + 'processing')
         for tag in list_of_tags:
             par = BaiDuPOI(str(tag), loc_to_use)  # 请修改这里的参数
             a = par.baidu_search()
             doc = open(file_name , 'a')
             for ax in a:
+                if ax == "###":
+                    print("限额用完，终止爬取")
+                    break_flag = True
+                    break
                 print(ax)
                 doc.write(ax)
                 doc.write('\n')
+            if break_flag:
+                break
             doc.close()
+        if break_flag:
+            break
     end_time = time.time()
     print("数据爬取完毕，用时%.2f秒" % (end_time - start_time))
